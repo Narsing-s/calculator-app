@@ -28,15 +28,38 @@ body {
   align-items:center;
 }
 
+/* Tabs */
+.tabs {
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+}
+.tabs button {
+  padding:8px 12px;
+}
+
+/* Hide pages */
+.page { display:none; }
+.active { display:block; }
+
 .calculator {
   width:350px;
   background:var(--box);
   padding:15px;
   border-radius:15px;
-  margin-top:20px;
-  box-shadow:0 0 20px black;
+  margin-top:10px;
 }
 
+/* Result preview (NEW ✅) */
+.preview {
+  width:100%;
+  padding:6px;
+  font-size:1.2em;
+  color:#aaa;
+  text-align:right;
+}
+
+/* Display */
 .display {
   width:100%;
   font-size:2em;
@@ -75,79 +98,84 @@ button:hover {
   background:var(--box);
   padding:10px;
   border-radius:10px;
-  max-height:150px;
+  max-height:300px;
   overflow:auto;
-}
-
-.topbar {
-  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <button onclick="toggleTheme()">🌙 Theme</button>
-  <button onclick="clearHistory()">🗑 History</button>
+<!-- Tabs -->
+<div class="tabs">
+  <button onclick="showPage('calc')">Calculator</button>
+  <button onclick="showPage('historyPage')">History</button>
+  <button onclick="showPage('settingsPage')">Settings</button>
 </div>
 
-<div class="calculator">
-  <input id="display" class="display" readonly>
+<!-- CALCULATOR PAGE -->
+<div id="calc" class="page active">
+  <div class="calculator">
+    <div id="preview" class="preview"></div>
+    <input id="display" class="display" readonly>
 
-  <div class="buttons">
+    <div class="buttons">
 
-    <!-- Memory -->
-    <button onclick="memoryAdd()">M+</button>
-    <button onclick="memorySub()">M-</button>
-    <button onclick="memoryRecall()">MR</button>
-    <button onclick="memoryClear()">MC</button>
-    <button onclick="voice()">🎤</button>
+      <button onclick="clearDisplay()">C</button>
+      <button onclick="back()">⌫</button>
+      <button onclick="append('%')">%</button>
+      <button onclick="append('/')">/</button>
+      <button onclick="sqrt()">√</button>
 
-    <button onclick="clearDisplay()">C</button>
-    <button onclick="back()">⌫</button>
-    <button onclick="append('%')">%</button>
-    <button onclick="append('/')">/</button>
-    <button onclick="sqrt()">√</button>
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('*')">*</button>
+      <button onclick="pow2()">x²</button>
 
-    <button onclick="append('7')">7</button>
-    <button onclick="append('8')">8</button>
-    <button onclick="append('9')">9</button>
-    <button onclick="append('*')">*</button>
-    <button onclick="pow2()">x²</button>
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('-')">-</button>
+      <button onclick="pow3()">x³</button>
 
-    <button onclick="append('4')">4</button>
-    <button onclick="append('5')">5</button>
-    <button onclick="append('6')">6</button>
-    <button onclick="append('-')">-</button>
-    <button onclick="pow3()">x³</button>
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('+')">+</button>
+      <button onclick="copy()">📋</button>
 
-    <button onclick="append('1')">1</button>
-    <button onclick="append('2')">2</button>
-    <button onclick="append('3')">3</button>
-    <button onclick="append('+')">+</button>
-    <button onclick="copy()">📋</button>
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button onclick="calculate()">=</button>
+      <button onclick="solve()">🧠</button>
 
-    <button onclick="append('0')">0</button>
-    <button onclick="append('.')">.</button>
-    <button onclick="calculate()">=</button>
-    <button onclick="solve()">🧠</button>
+      <button onclick="func('sin')">sin</button>
+      <button onclick="func('cos')">cos</button>
+      <button onclick="func('tan')">tan</button>
+      <button onclick="func('log')">log</button>
 
-    <button onclick="func('sin')">sin</button>
-    <button onclick="func('cos')">cos</button>
-    <button onclick="func('tan')">tan</button>
-    <button onclick="func('log')">log</button>
-
+    </div>
   </div>
 </div>
 
-<div class="panel" id="history"></div>
+<!-- HISTORY PAGE -->
+<div id="historyPage" class="page">
+  <div class="panel" id="history"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div id="settingsPage" class="page">
+  <div class="panel">
+    <button onclick="toggleTheme()">🌙 Toggle Theme</button><br><br>
+    <button onclick="clearHistory()">🗑 Clear History</button>
+  </div>
+</div>
 
 <script>
 let d = document.getElementById("display");
+let preview = document.getElementById("preview");
 let hist = document.getElementById("history");
-
-let memory = 0;
 
 // Load saved data
 hist.innerHTML = localStorage.getItem("hist") || "";
@@ -155,12 +183,37 @@ if(localStorage.getItem("theme")==="light"){
   document.body.classList.add("light");
 }
 
+// Tabs
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
 // Input
-function append(v){ d.value += v; }
+function append(v){
+  d.value += v;
+  updatePreview();
+}
 
-function clearDisplay(){ d.value=""; }
+function clearDisplay(){
+  d.value="";
+  preview.innerText="";
+}
 
-function back(){ d.value = d.value.slice(0,-1); }
+function back(){
+  d.value = d.value.slice(0,-1);
+  updatePreview();
+}
+
+// LIVE RESULT PREVIEW ✅
+function updatePreview(){
+  try {
+    let res = Function("return " + d.value)();
+    preview.innerText = "= " + res;
+  } catch {
+    preview.innerText = "";
+  }
+}
 
 // Calculate
 function calculate(){
@@ -168,6 +221,7 @@ function calculate(){
     let exp = d.value;
     let res = Function("return " + exp)();
     d.value = res;
+    preview.innerText="";
     saveHistory(exp + " = " + res);
   } catch {
     d.value="Error";
@@ -192,27 +246,18 @@ function func(type){
   let x = parseFloat(d.value);
   if(isNaN(x)) return;
   let r;
-
-  switch(type){
-    case 'sin': r=Math.sin(x); break;
-    case 'cos': r=Math.cos(x); break;
-    case 'tan': r=Math.tan(x); break;
-    case 'log': r=Math.log10(x); break;
-  }
+  if(type==="sin") r=Math.sin(x);
+  if(type==="cos") r=Math.cos(x);
+  if(type==="tan") r=Math.tan(x);
+  if(type==="log") r=Math.log10(x);
   d.value=r;
   saveHistory(`${type}(${x})=${r}`);
 }
 
-// Power
+// Extras
 function pow2(){ let x=parseFloat(d.value)||0; d.value=x*x; }
 function pow3(){ let x=parseFloat(d.value)||0; d.value=x*x*x; }
 function sqrt(){ d.value=Math.sqrt(parseFloat(d.value)||0); }
-
-// Memory
-function memoryAdd(){ memory += parseFloat(d.value)||0; }
-function memorySub(){ memory -= parseFloat(d.value)||0; }
-function memoryRecall(){ d.value = memory; }
-function memoryClear(){ memory = 0; }
 
 // Copy
 function copy(){
@@ -228,34 +273,12 @@ function toggleTheme(){
   );
 }
 
-// Voice
-function voice(){
-  let rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
-  rec.onresult=e=>{
-    d.value = e.results[0][0].transcript
-      .replace(/plus/g,'+')
-      .replace(/minus/g,'-')
-      .replace(/times/g,'*')
-      .replace(/divided by/g,'/');
-  };
-  rec.start();
-}
-
 // AI Solver
 function solve(){
   let exp=d.value;
   try{
     let result=Function("return "+exp)();
-
-    let msg = "Expression: " + exp + "\n\n";
-    msg += "Order of Operations:\n";
-
-    if(exp.match(/[*/]/)) msg += "1. Multiply/Divide\n";
-    if(exp.match(/[+-]/)) msg += "2. Add/Subtract\n";
-
-    msg += "\nFinal Result: " + result;
-
-    alert(msg);
+    alert("Expression: "+exp+"\nResult: "+result);
   } catch {
     alert("Cannot solve");
   }
@@ -263,7 +286,9 @@ function solve(){
 
 // Keyboard
 document.addEventListener("keydown", e=>{
-  if(!isNaN(e.key)||"+-*/.%".includes(e.key)) append(e.key);
+  if(!isNaN(e.key)||"+-*/.%".includes(e.key)){
+    append(e.key);
+  }
   if(e.key==="Enter") calculate();
   if(e.key==="Backspace") back();
 });

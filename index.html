@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Calculator</title>
+
+<style>
+:root {
+  --bg:#121212;
+  --box:#1e1e1e;
+  --text:#fff;
+  --accent:#00e6e6;
+}
+.light {
+  --bg:#f5f5f5;
+  --box:#ffffff;
+  --text:#000;
+}
+
+body {
+  margin:0;
+  font-family:Segoe UI;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.calculator {
+  width:350px;
+  background:var(--box);
+  padding:15px;
+  border-radius:15px;
+  margin-top:20px;
+  box-shadow:0 0 20px black;
+}
+
+.display {
+  width:100%;
+  font-size:2em;
+  padding:10px;
+  background:#333;
+  color:white;
+  border:none;
+  border-radius:10px;
+  text-align:right;
+}
+
+.buttons {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  margin-top:10px;
+}
+
+button {
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#2c2c2c;
+  color:white;
+  cursor:pointer;
+}
+
+button:hover {
+  background:var(--accent);
+  color:black;
+}
+
+.panel {
+  width:350px;
+  margin-top:10px;
+  background:var(--box);
+  padding:10px;
+  border-radius:10px;
+  max-height:150px;
+  overflow:auto;
+}
+
+.topbar {
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <button onclick="toggleTheme()">🌙 Theme</button>
+  <button onclick="clearHistory()">🗑 History</button>
+</div>
+
+<div class="calculator">
+  <input id="display" class="display" readonly>
+
+  <div class="buttons">
+
+    <!-- Memory -->
+    <button onclick="memoryAdd()">M+</button>
+    <button onclick="memorySub()">M-</button>
+    <button onclick="memoryRecall()">MR</button>
+    <button onclick="memoryClear()">MC</button>
+    <button onclick="voice()">🎤</button>
+
+    <button onclick="clearDisplay()">C</button>
+    <button onclick="back()">⌫</button>
+    <button onclick="append('%')">%</button>
+    <button onclick="append('/')">/</button>
+    <button onclick="sqrt()">√</button>
+
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button onclick="append('*')">*</button>
+    <button onclick="pow2()">x²</button>
+
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button onclick="append('-')">-</button>
+    <button onclick="pow3()">x³</button>
+
+    <button onclick="append('1')">1</button>
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button onclick="append('+')">+</button>
+    <button onclick="copy()">📋</button>
+
+    <button onclick="append('0')">0</button>
+    <button onclick="append('.')">.</button>
+    <button onclick="calculate()">=</button>
+    <button onclick="solve()">🧠</button>
+
+    <button onclick="func('sin')">sin</button>
+    <button onclick="func('cos')">cos</button>
+    <button onclick="func('tan')">tan</button>
+    <button onclick="func('log')">log</button>
+
+  </div>
+</div>
+
+<div class="panel" id="history"></div>
+
+<script>
+let d = document.getElementById("display");
+let hist = document.getElementById("history");
+
+let memory = 0;
+
+// Load saved data
+hist.innerHTML = localStorage.getItem("hist") || "";
+if(localStorage.getItem("theme")==="light"){
+  document.body.classList.add("light");
+}
+
+// Input
+function append(v){ d.value += v; }
+
+function clearDisplay(){ d.value=""; }
+
+function back(){ d.value = d.value.slice(0,-1); }
+
+// Calculate
+function calculate(){
+  try {
+    let exp = d.value;
+    let res = Function("return " + exp)();
+    d.value = res;
+    saveHistory(exp + " = " + res);
+  } catch {
+    d.value="Error";
+  }
+}
+
+// History
+function saveHistory(text){
+  let p=document.createElement("p");
+  p.textContent=text;
+  hist.prepend(p);
+  localStorage.setItem("hist", hist.innerHTML);
+}
+
+function clearHistory(){
+  hist.innerHTML="";
+  localStorage.removeItem("hist");
+}
+
+// Scientific
+function func(type){
+  let x = parseFloat(d.value);
+  if(isNaN(x)) return;
+  let r;
+
+  switch(type){
+    case 'sin': r=Math.sin(x); break;
+    case 'cos': r=Math.cos(x); break;
+    case 'tan': r=Math.tan(x); break;
+    case 'log': r=Math.log10(x); break;
+  }
+  d.value=r;
+  saveHistory(`${type}(${x})=${r}`);
+}
+
+// Power
+function pow2(){ let x=parseFloat(d.value)||0; d.value=x*x; }
+function pow3(){ let x=parseFloat(d.value)||0; d.value=x*x*x; }
+function sqrt(){ d.value=Math.sqrt(parseFloat(d.value)||0); }
+
+// Memory
+function memoryAdd(){ memory += parseFloat(d.value)||0; }
+function memorySub(){ memory -= parseFloat(d.value)||0; }
+function memoryRecall(){ d.value = memory; }
+function memoryClear(){ memory = 0; }
+
+// Copy
+function copy(){
+  navigator.clipboard.writeText(d.value);
+  alert("Copied!");
+}
+
+// Theme
+function toggleTheme(){
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme",
+    document.body.classList.contains("light")?"light":"dark"
+  );
+}
+
+// Voice
+function voice(){
+  let rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
+  rec.onresult=e=>{
+    d.value = e.results[0][0].transcript
+      .replace(/plus/g,'+')
+      .replace(/minus/g,'-')
+      .replace(/times/g,'*')
+      .replace(/divided by/g,'/');
+  };
+  rec.start();
+}
+
+// AI Solver
+function solve(){
+  let exp=d.value;
+  try{
+    let result=Function("return "+exp)();
+
+    let msg = "Expression: " + exp + "\n\n";
+    msg += "Order of Operations:\n";
+
+    if(exp.match(/[*/]/)) msg += "1. Multiply/Divide\n";
+    if(exp.match(/[+-]/)) msg += "2. Add/Subtract\n";
+
+    msg += "\nFinal Result: " + result;
+
+    alert(msg);
+  } catch {
+    alert("Cannot solve");
+  }
+}
+
+// Keyboard
+document.addEventListener("keydown", e=>{
+  if(!isNaN(e.key)||"+-*/.%".includes(e.key)) append(e.key);
+  if(e.key==="Enter") calculate();
+  if(e.key==="Backspace") back();
+});
+</script>
+
+</body>
+</html>

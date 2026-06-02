@@ -42,11 +42,7 @@ body {
   gap:10px;
   margin-top:10px;
 }
-.tabs button {
-  padding:8px 12px;
-}
 
-/* Pages */
 .page { display:none; }
 .active { display:block; }
 
@@ -86,6 +82,16 @@ button:hover {
   max-height:250px;
   overflow:auto;
 }
+
+.footer {
+  margin:20px;
+  font-size:12px;
+  opacity:0.7;
+}
+.footer a {
+  color:var(--accent);
+  text-decoration:none;
+}
 </style>
 </head>
 
@@ -101,7 +107,6 @@ button:hover {
 <!-- APP -->
 <div id="app" style="display:none">
 
-  <!-- ✅ TEXT TABS -->
   <div class="tabs">
     <button onclick="showPage('calc')">Calculator</button>
     <button onclick="showPage('historyPage')">History</button>
@@ -169,6 +174,14 @@ button:hover {
 
 </div>
 
+<!-- ✅ FIXED FOOTER -->
+<div class="footer">
+  Created by Narsings |
+  <a href="https://github.com/Narsing-s/calculator-app/blob/main/index.html" target="_blank">
+    calculator-api
+  </a>
+</div>
+
 <script>
 let d=document.getElementById("display");
 let p=document.getElementById("preview");
@@ -182,7 +195,6 @@ if(localStorage.getItem("user")){
   showApp();
 }
 
-// Login
 function login(){
   let name=document.getElementById("username").value.trim();
   if(!name) return alert("Enter username");
@@ -192,24 +204,20 @@ function login(){
   showApp();
 }
 
-// Logout
 function logout(){
   localStorage.removeItem("user");
   user=null;
 
   document.getElementById("app").style.display="none";
   document.getElementById("loginPage").style.display="block";
-  document.getElementById("username").value="";
 }
 
-// Show app
 function showApp(){
   document.getElementById("loginPage").style.display="none";
   document.getElementById("app").style.display="block";
   loadHistory();
 }
 
-// Tabs
 function showPage(id){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -227,18 +235,23 @@ function saveHistory(text){
   localStorage.setItem("hist_"+user, hist.innerHTML);
 }
 
-// Input
+// ✅ FIXED
+function clearHistory(){
+  localStorage.removeItem("hist_"+user);
+  hist.innerHTML="";
+  alert("History Cleared!");
+}
+
+// Calculator
 function append(v){ d.value+=v; preview(); }
 function clearDisplay(){ d.value=""; p.innerText=""; }
 function back(){ d.value=d.value.slice(0,-1); preview(); }
 
-// Preview
 function preview(){
   try{ p.innerText="= "+Function("return "+d.value)(); }
   catch{ p.innerText=""; }
 }
 
-// Calculate
 function calculate(){
   try{
     let exp=d.value;
@@ -249,7 +262,6 @@ function calculate(){
   }catch{ d.value="Error"; }
 }
 
-// Scientific
 function func(t){
   let x=parseFloat(d.value);
   if(isNaN(x)) return;
@@ -258,18 +270,15 @@ function func(t){
   saveHistory(`${t}(${x})=${r}`);
 }
 
-// Extras
 function sqrt(){ d.value=Math.sqrt(parseFloat(d.value)||0); }
 function pow2(){ let x=parseFloat(d.value)||0; d.value=x*x; }
 function pow3(){ let x=parseFloat(d.value)||0; d.value=x*x*x; }
 
-// Copy
 function copy(){
   navigator.clipboard.writeText(d.value);
   alert("Copied!");
 }
 
-// Export
 function exportHistory(){
   let blob=new Blob([hist.innerText],{type:"text/plain"});
   let a=document.createElement("a");
@@ -278,12 +287,10 @@ function exportHistory(){
   a.click();
 }
 
-// Theme
 function toggleTheme(){
   document.body.classList.toggle("light");
 }
 
-// Solver
 function solve(){
   try{
     let res=Function("return "+d.value)();
@@ -293,7 +300,6 @@ function solve(){
   }
 }
 
-// Keyboard
 document.addEventListener("keydown", e=>{
   if(!isNaN(e.key)||"+-*/.%".includes(e.key)) append(e.key);
   if(e.key==="Enter") calculate();
@@ -303,4 +309,3 @@ document.addEventListener("keydown", e=>{
 
 </body>
 </html>
--

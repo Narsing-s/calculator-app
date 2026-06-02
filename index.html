@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SaaS Calculator Pro</title>
 
+<!-- ✅ Chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root {
   --bg:#0f172a;
-  --card:rgba(255,255,255,0.06);
+  --card:#1e293b;
   --text:#fff;
-  --accent:#22c55e;
 }
 .light {
   --bg:#f5f5f5;
@@ -18,7 +20,7 @@
   --text:#000;
 }
 
-body {
+body{
   margin:0;
   font-family:Segoe UI;
   background:var(--bg);
@@ -28,70 +30,44 @@ body {
   align-items:center;
 }
 
-.card {
+.card{
   width:350px;
   background:var(--card);
-  backdrop-filter:blur(10px);
   padding:20px;
   border-radius:15px;
   margin-top:20px;
 }
 
-.tabs {
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
 
-.page { display:none; }
-.active { display:block; }
+.page{display:none}
+.active{display:block}
 
-.preview { text-align:right; color:#aaa; }
-
-.display {
+.display{
   width:100%;
   font-size:2em;
   padding:10px;
-  background:#111;
-  border:none;
-  border-radius:10px;
-  color:white;
   text-align:right;
 }
 
-.buttons {
+.buttons{
   display:grid;
   grid-template-columns:repeat(5,1fr);
-  gap:6px;
+  gap:5px;
 }
 
-button {
-  padding:10px;
+button{
+  padding:8px;
   border:none;
-  border-radius:10px;
-  background:#1e293b;
-  color:white;
+  border-radius:8px;
   cursor:pointer;
 }
-button:hover {
-  background:var(--accent);
-  color:black;
-}
 
-.panel {
-  max-height:250px;
-  overflow:auto;
-}
-
-.footer {
+.footer{
   margin:20px;
   font-size:12px;
-  opacity:0.7;
 }
-.footer a {
-  color:var(--accent);
-  text-decoration:none;
-}
+.footer a{color:green}
 </style>
 </head>
 
@@ -99,212 +75,230 @@ button:hover {
 
 <!-- LOGIN -->
 <div id="loginPage" class="card">
-  <h2>Login</h2>
-  <input id="username" placeholder="Enter username" style="width:100%;padding:10px"><br><br>
+  <h3>Login</h3>
+  <input id="username" placeholder="Enter name" style="width:100%;padding:10px">
+  <br><br>
   <button onclick="login()">Enter</button>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none">
 
-  <div class="tabs">
-    <button onclick="showPage('calc')">Calculator</button>
-    <button onclick="showPage('historyPage')">History</button>
-    <button onclick="showPage('settingsPage')">Settings</button>
-    <button onclick="logout()">Logout</button>
-  </div>
+<div class="tabs">
+<button onclick="showPage('calc')">Calc</button>
+<button onclick="showPage('historyPage')">History</button>
+<button onclick="showPage('chartPage')">Chart</button>
+<button onclick="showPage('convertPage')">Convert</button>
+<button onclick="showPage('extrasPage')">Extras</button>
+<button onclick="logout()">Logout</button>
+</div>
 
-  <!-- CALCULATOR -->
-  <div id="calc" class="page active">
-    <div class="card">
-      <div id="preview" class="preview"></div>
-      <input id="display" class="display" readonly>
+<!-- CALC -->
+<div id="calc" class="page active">
+<div class="card">
 
-      <div class="buttons">
-        <button onclick="clearDisplay()">C</button>
-        <button onclick="back()">⌫</button>
-        <button onclick="append('%')">%</button>
-        <button onclick="append('/')">/</button>
-        <button onclick="sqrt()">√</button>
+<input id="display" class="display" readonly>
 
-        <button onclick="append('7')">7</button>
-        <button onclick="append('8')">8</button>
-        <button onclick="append('9')">9</button>
-        <button onclick="append('*')">*</button>
-        <button onclick="pow2()">x²</button>
+<div class="buttons">
+<button onclick="append('7')">7</button>
+<button onclick="append('8')">8</button>
+<button onclick="append('9')">9</button>
+<button onclick="append('+')">+</button>
+<button onclick="mAdd()">M+</button>
 
-        <button onclick="append('4')">4</button>
-        <button onclick="append('5')">5</button>
-        <button onclick="append('6')">6</button>
-        <button onclick="append('-')">-</button>
-        <button onclick="pow3()">x³</button>
+<button onclick="append('4')">4</button>
+<button onclick="append('5')">5</button>
+<button onclick="append('6')">6</button>
+<button onclick="append('-')">-</button>
+<button onclick="mSub()">M-</button>
 
-        <button onclick="append('1')">1</button>
-        <button onclick="append('2')">2</button>
-        <button onclick="append('3')">3</button>
-        <button onclick="append('+')">+</button>
-        <button onclick="copy()">Copy</button>
+<button onclick="append('1')">1</button>
+<button onclick="append('2')">2</button>
+<button onclick="append('3')">3</button>
+<button onclick="append('*')">*</button>
+<button onclick="mRecall()">MR</button>
 
-        <button onclick="append('0')">0</button>
-        <button onclick="append('.')">.</button>
-        <button onclick="calculate()">=</button>
-        <button onclick="solve()">Solve</button>
+<button onclick="append('0')">0</button>
+<button onclick="append('.')">.</button>
+<button onclick="calculate()">=</button>
+<button onclick="append('/')">/</button>
+<button onclick="mClear()">MC</button>
 
-        <button onclick="func('sin')">sin</button>
-        <button onclick="func('cos')">cos</button>
-        <button onclick="func('tan')">tan</button>
-        <button onclick="func('log')">log</button>
-      </div>
-    </div>
-  </div>
+<button onclick="startVoice()">🎤</button>
+</div>
+</div>
+</div>
 
-  <!-- HISTORY -->
-  <div id="historyPage" class="page">
-    <div class="card panel" id="history"></div>
-    <button onclick="exportHistory()">Export History</button>
-  </div>
+<!-- HISTORY -->
+<div id="historyPage" class="page">
+<div class="card" id="history"></div>
+<button onclick="clearHistory()">Clear History</button>
+</div>
 
-  <!-- SETTINGS -->
-  <div id="settingsPage" class="page">
-    <div class="card">
-      <button onclick="toggleTheme()">Toggle Theme</button><br><br>
-      <button onclick="clearHistory()">Clear History</button>
-    </div>
-  </div>
+<!-- CHART -->
+<div id="chartPage" class="page">
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+</div>
+
+<!-- CONVERTER -->
+<div id="convertPage" class="page">
+<div class="card">
+
+<h4>Length</h4>
+<input id="cm" placeholder="CM">
+<button onclick="cmToM()">→ M</button>
+<button onclick="cmToKm()">→ KM</button>
+
+<h4>Weight</h4>
+<input id="g" placeholder="Grams">
+<button onclick="gToKg()">→ KG</button>
+
+<h4>Temperature</h4>
+<input id="c" placeholder="Celsius">
+<button onclick="cToF()">→ F</button>
+
+<h4>Currency</h4>
+<input id="inr" placeholder="INR">
+<button onclick="inrToUsd()">→ USD</button>
+
+<p id="result"></p>
+</div>
+</div>
+
+<!-- EXTRA -->
+<div id="extrasPage" class="page">
+<div class="card">
+<h4>BMI</h4>
+<input id="weight" placeholder="Weight (kg)">
+<input id="height" placeholder="Height (m)">
+<button onclick="calcBMI()">Calculate</button>
+<p id="bmiResult"></p>
+</div>
+</div>
 
 </div>
 
-<!-- ✅ FIXED FOOTER -->
+<!-- FOOTER -->
 <div class="footer">
-  Created by Narsings |
-  <a href="https://github.com/Narsing-s/calculator-app/blob/main/index.html" target="_blank">
-    calculator-api
-  </a>
+Created by Narsings |
+<a href="https://github.com/Narsing-s/calculator-app" target="_blank">
+calculator-api
+</a>
 </div>
 
 <script>
 let d=document.getElementById("display");
-let p=document.getElementById("preview");
 let hist=document.getElementById("history");
 
 let user=null;
+let memory=0;
+let chartData=[];
 
-// Auto login
-if(localStorage.getItem("user")){
-  user=localStorage.getItem("user");
-  showApp();
-}
-
-function login(){
-  let name=document.getElementById("username").value.trim();
-  if(!name) return alert("Enter username");
-
-  user=name;
-  localStorage.setItem("user",user);
-  showApp();
-}
-
-function logout(){
-  localStorage.removeItem("user");
-  user=null;
-
-  document.getElementById("app").style.display="none";
-  document.getElementById("loginPage").style.display="block";
-}
-
-function showApp(){
-  document.getElementById("loginPage").style.display="none";
-  document.getElementById("app").style.display="block";
-  loadHistory();
-}
-
-function showPage(id){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-// History
-function loadHistory(){
-  hist.innerHTML = localStorage.getItem("hist_"+user) || "";
-}
-
-function saveHistory(text){
-  let node=document.createElement("p");
-  node.textContent=text;
-  hist.prepend(node);
-  localStorage.setItem("hist_"+user, hist.innerHTML);
-}
-
-// ✅ FIXED
-function clearHistory(){
-  localStorage.removeItem("hist_"+user);
-  hist.innerHTML="";
-  alert("History Cleared!");
-}
-
-// Calculator
-function append(v){ d.value+=v; preview(); }
-function clearDisplay(){ d.value=""; p.innerText=""; }
-function back(){ d.value=d.value.slice(0,-1); preview(); }
-
-function preview(){
-  try{ p.innerText="= "+Function("return "+d.value)(); }
-  catch{ p.innerText=""; }
-}
-
-function calculate(){
-  try{
-    let exp=d.value;
-    let res=Function("return "+exp)();
-    d.value=res;
-    p.innerText="";
-    saveHistory(exp+" = "+res);
-  }catch{ d.value="Error"; }
-}
-
-function func(t){
-  let x=parseFloat(d.value);
-  if(isNaN(x)) return;
-  let r=Math[t==="log"?"log10":t](x);
-  d.value=r;
-  saveHistory(`${t}(${x})=${r}`);
-}
-
-function sqrt(){ d.value=Math.sqrt(parseFloat(d.value)||0); }
-function pow2(){ let x=parseFloat(d.value)||0; d.value=x*x; }
-function pow3(){ let x=parseFloat(d.value)||0; d.value=x*x*x; }
-
-function copy(){
-  navigator.clipboard.writeText(d.value);
-  alert("Copied!");
-}
-
-function exportHistory(){
-  let blob=new Blob([hist.innerText],{type:"text/plain"});
-  let a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=user+"_history.txt";
-  a.click();
-}
-
-function toggleTheme(){
-  document.body.classList.toggle("light");
-}
-
-function solve(){
-  try{
-    let res=Function("return "+d.value)();
-    alert("Result: "+res);
-  }catch{
-    alert("Error");
-  }
-}
-
-document.addEventListener("keydown", e=>{
-  if(!isNaN(e.key)||"+-*/.%".includes(e.key)) append(e.key);
-  if(e.key==="Enter") calculate();
-  if(e.key==="Backspace") back();
+// ✅ Chart
+let chart=new Chart(document.getElementById("chart"),{
+ type:'line',
+ data:{labels:[],datasets:[{data:[],borderColor:'green'}]}
 });
+
+// ✅ LOGIN
+function login(){
+ let name=username.value.trim();
+ if(!name) return alert("Enter name");
+ user=name;
+ localStorage.setItem("user",user);
+ showApp();
+}
+
+if(localStorage.getItem("user")){
+ user=localStorage.getItem("user");
+ showApp();
+}
+
+// ✅ LOGOUT FIX
+function logout(){
+ user=null;
+ localStorage.removeItem("user");
+ document.getElementById("app").style.display="none";
+ document.getElementById("loginPage").style.display="block";
+}
+
+// ✅ SHOW APP
+function showApp(){
+ loginPage.style.display="none";
+ app.style.display="block";
+ loadHistory();
+}
+
+// ✅ NAV
+function showPage(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+}
+
+// ✅ CALC
+function append(v){ d.value+=v }
+function calculate(){
+ try{
+ let res=Function("return "+d.value)();
+ d.value=res;
+ saveHistory(res);
+ updateChart(res);
+ }catch{ d.value="Error" }
+}
+
+// ✅ HISTORY
+function loadHistory(){
+ hist.innerHTML=localStorage.getItem("hist_"+user)||"";
+}
+function saveHistory(val){
+ let p=document.createElement("p");
+ p.textContent=val;
+ hist.prepend(p);
+ localStorage.setItem("hist_"+user,hist.innerHTML);
+}
+function clearHistory(){
+ localStorage.removeItem("hist_"+user);
+ hist.innerHTML="";
+}
+
+// ✅ MEMORY
+function mAdd(){memory+=Number(d.value||0)}
+function mSub(){memory-=Number(d.value||0)}
+function mRecall(){d.value=memory}
+function mClear(){memory=0}
+
+// ✅ CHART
+function updateChart(val){
+ chartData.push(val);
+ chart.data.labels=chartData.map((_,i)=>i+1);
+ chart.data.datasets[0].data=chartData;
+ chart.update();
+}
+
+// ✅ VOICE
+function startVoice(){
+ let rec=new(window.SpeechRecognition||webkitSpeechRecognition)();
+ rec.onresult=e=>{
+  d.value+=e.results[0][0].transcript;
+ };
+ rec.start();
+}
+
+// ✅ CONVERSIONS
+function cmToM(){result.innerText=cm.value/100+" m"}
+function cmToKm(){result.innerText=cm.value/100000+" km"}
+function gToKg(){result.innerText=g.value/1000+" kg"}
+function cToF(){result.innerText=(c.value*9/5+32)+" F"}
+function inrToUsd(){result.innerText=(inr.value/83).toFixed(2)+" USD"}
+
+// ✅ BMI
+function calcBMI(){
+ let w=weight.value;
+ let h=height.value;
+ bmiResult.innerText=(w/(h*h)).toFixed(2);
+}
 </script>
 
 </body>
